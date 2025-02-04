@@ -15,7 +15,6 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Secret patterns for API key detection
 secret_patterns = {
-     
     'General API Key': r'(?i)\bAPI\s*Key\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
     'API Token': r'(?i)\bAPI\s*Token\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
     'API Access Key': r'(?i)\bAPI\s*Access\s*Key\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
@@ -318,7 +317,7 @@ def run_subfinder_for_domain(domain):
         return []
 
 # Main function
-def main(domain=None, file_path=None):
+def main(domain=None, file_path=None, threads=10):
     all_js_files = set()
 
     # Check if domain is provided or file is provided
@@ -348,8 +347,8 @@ def main(domain=None, file_path=None):
         return
 
     # Use ThreadPoolExecutor to process subdomains in parallel
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        print("Crawling subdomains...")
+    with concurrent.futures.ThreadPoolExecutor(max_workers=threads) as executor:
+        print(f"Crawling subdomains with {threads} threads...")
         future_to_subdomain = {executor.submit(crawl_subdomain, subdomain): subdomain for subdomain in subdomains}
 
         # Gather all JS URLs
@@ -392,19 +391,30 @@ def main(domain=None, file_path=None):
 
 # Entry point for script execution
 if __name__ == "__main__":
+    # Check if the correct flags are passed
     if len(sys.argv) < 3:
-        print("Usage: python3 main.py -d <domain> OR python3 main.py -f <subdomain_file>")
+        print("Usage: python3 main.py -d <domain> OR python3 main.py -f <subdomain_file> --threads <number_of_threads>")
         sys.exit(1)
 
     flag = sys.argv[1]
     input_data = sys.argv[2]
+    threads = 10  # Default threads value
+
+    # Check if the --threads flag is passed
+    if "--threads" in sys.argv:
+        try:
+            threads_idx = sys.argv.index("--threads") + 1
+            threads = int(sys.argv[threads_idx])
+        except (IndexError, ValueError):
+            print("Invalid value for threads. Using default value of 10.")
+            threads = 10
 
     if flag == "-d":  # Domain mode
-        print(f"Starting scan for domain: {input_data}")
-        main(domain=input_data)
+        print(f"Starting scan for domain: {input_data} with {threads} threads.")
+        main(domain=input_data, threads=threads)
     elif flag == "-f":  # Subdomain file mode
-        print(f"Starting scan from subdomain file: {input_data}")
-        main(file_path=input_data)
+        print(f"Starting scan from subdomain file: {input_data} with {threads} threads.")
+        main(file_path=input_data, threads=threads)
     else:
         print("Invalid flag! Use -d for domain or -f for subdomain file.")
         sys.exit(1)
