@@ -1,3 +1,11 @@
+
+## Clone The Repository:
+
+   ```bash
+  git clone https://github.com/rocksec00/JSRecon.git
+  cd JSRecon
+   ```
+
 ## Install requiered packages:
 
    ```bash
