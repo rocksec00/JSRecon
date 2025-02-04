@@ -47,12 +47,12 @@ To use the tool for subdomains:
 
 3. If you don't have a list of subdomains, run:
    ```bash
-   multijs -d example.com
+   multijs -d example.com --threads 20
    ```
 
 4. If you have a list of subdomains in a text file (e.g., `subdomains.txt`), run:
    ```bash
-   multijs -f subdomains.txt
+   multijs -f subdomains.txt --threads 20
    ```
 
 ## Note:
