@@ -56,7 +56,4 @@ To use the tool for subdomains:
    ```
 
 ## Note:
-Once completed, the output file will be saved.
-```
-
-You can adjust the "Project Name" and the specific commands as needed. This format provides clear steps for users to follow and properly execute your scripts for both single domain and subdomain cases.
+Once completed, the output file will be saved. Ex: results_20250204_224659.json
