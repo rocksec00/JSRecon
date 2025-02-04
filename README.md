@@ -1,6 +1,3 @@
-```markdown
-# Project Name
-
 ## singlejs (For Single Domain)
 
 To use the tool for a single domain:
