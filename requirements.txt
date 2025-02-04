@@ -1,9 +1,2 @@
-requests
-re
-subprocess
-json
-urllib3
-sys
-time
-concurrent.futures
-os
+requests==2.31.0
+urllib3==1.26.14
