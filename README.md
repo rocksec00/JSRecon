@@ -1,3 +1,14 @@
+## Required Tools:
+
+   ```bash
+ go install github.com/projectdiscovery/katana/cmd/katana@latest
+ go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
+   ```
+If Not Access the go tool 
+  ```bash
+export GOPATH=$HOME/go
+export PATH=$PATH:$GOPATH/bin
+   ```
 
 ## Clone The Repository:
 
@@ -5,7 +16,6 @@
   git clone https://github.com/rocksec00/JSRecon.git
   cd JSRecon
    ```
-
 ## Install requiered packages:
 
    ```bash
