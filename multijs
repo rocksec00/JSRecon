@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import concurrent.futures
 import requests
 import re
 import subprocess
@@ -14,7 +15,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Secret patterns for API key detection
 secret_patterns = {
-      
+     
     'General API Key': r'(?i)\bAPI\s*Key\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
     'API Token': r'(?i)\bAPI\s*Token\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
     'API Access Key': r'(?i)\bAPI\s*Access\s*Key\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
@@ -317,23 +318,23 @@ def run_subfinder_for_domain(domain):
         return []
 
 # Main function
-def main(input_data):
+def main(domain=None, file_path=None):
     all_js_files = set()
 
-    # Check if input_data is a domain or a file
-    if '.' in input_data:  # Domain provided
-        print(f"Scanning domain: {input_data}")
-        subdomains = run_subfinder_for_domain(input_data)
+    # Check if domain is provided or file is provided
+    if domain:  # Domain provided
+        print(f"Scanning domain: {domain}")
+        subdomains = run_subfinder_for_domain(domain)
 
         if not subdomains:
-            print(f"No subdomains found for domain {input_data}. Exiting.")
+            print(f"No subdomains found for domain {domain}. Exiting.")
             return
 
         print(f"Found {len(subdomains)} subdomains.")
-    else:  # File containing subdomains
-        print(f"Reading subdomains from file: {input_data}")
+    elif file_path:  # File containing subdomains
+        print(f"Reading subdomains from file: {file_path}")
         try:
-            with open(input_data, 'r') as file:
+            with open(file_path, 'r') as file:
                 subdomains = [line.strip() for line in file.readlines()]
         except Exception as e:
             print(f"Error reading subdomain file: {e}")
@@ -342,14 +343,25 @@ def main(input_data):
         if not subdomains:
             print("No subdomains found in the provided file.")
             return
+    else:
+        print("Please provide either a domain or a subdomain file.")
+        return
 
-    # Process each subdomain
-    for subdomain in subdomains:
-        print(f"Crawling subdomain: {subdomain}")
-        urls = crawl_subdomain(subdomain)
+    # Use ThreadPoolExecutor to process subdomains in parallel
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        print("Crawling subdomains...")
+        future_to_subdomain = {executor.submit(crawl_subdomain, subdomain): subdomain for subdomain in subdomains}
 
-        js_files = filter_js_files(urls)
-        all_js_files.update(js_files)
+        # Gather all JS URLs
+        all_js_files = set()
+        for future in concurrent.futures.as_completed(future_to_subdomain):
+            subdomain = future_to_subdomain[future]
+            try:
+                urls = future.result()
+                js_files = filter_js_files(urls)
+                all_js_files.update(js_files)
+            except Exception as e:
+                print(f"Error crawling {subdomain}: {e}")
 
     print(f"Scanning {len(all_js_files)} JavaScript files for secrets & URLs...")
     secrets, extracted_urls = scan_js_for_secrets_and_urls(all_js_files)
@@ -380,11 +392,19 @@ def main(input_data):
 
 # Entry point for script execution
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python3 main.py <domain_or_subdomain_file>")
+    if len(sys.argv) < 3:
+        print("Usage: python3 main.py -d <domain> OR python3 main.py -f <subdomain_file>")
         sys.exit(1)
 
-    input_data = sys.argv[1]  # Domain or file containing subdomains
+    flag = sys.argv[1]
+    input_data = sys.argv[2]
 
-    print(f"Starting scan with input: {input_data}")
-    main(input_data)
+    if flag == "-d":  # Domain mode
+        print(f"Starting scan for domain: {input_data}")
+        main(domain=input_data)
+    elif flag == "-f":  # Subdomain file mode
+        print(f"Starting scan from subdomain file: {input_data}")
+        main(file_path=input_data)
+    else:
+        print("Invalid flag! Use -d for domain or -f for subdomain file.")
+        sys.exit(1)
