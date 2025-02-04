@@ -9,7 +9,7 @@
 ## Install requiered packages:
 
    ```bash
-   pip3 install requirements.txt
+   pip3 install -r requirements.txt
    ```
 
 ## singlejs (For Single Domain)
