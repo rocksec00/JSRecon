@@ -1,3 +1,9 @@
+## Install requiered packages:
+
+   ```bash
+   pip3 install requirements.txt
+   ```
+
 ## singlejs (For Single Domain)
 
 To use the tool for a single domain:
