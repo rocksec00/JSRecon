@@ -48,9 +48,9 @@ To use the tool for a single domain:
    ```bash
    singlejs -h
 
-4. Run the following command for your domain:
+4. Run the following command for your domain: (If you use globally access ignore "python3")
    ```bash
-   singlejs example.com
+   python3 singlejs example.com
    ```
 5. Run the command following for single JS Url:
    ```bash
@@ -88,9 +88,9 @@ To use the tool for subdomains:
    multijs -h
    ```
    
-4. If you don't have a list of subdomains, run:
+4. If you don't have a list of subdomains, run: (If you use globally access ignore "python3")
    ```bash
-   multijs -d example.com --threads 20
+   python3 multijs -d example.com --threads 20
    ```
 
 5. If you have a list of subdomains in a text file (e.g., `subdomains.txt`), run:
