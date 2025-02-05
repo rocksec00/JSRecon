@@ -28,11 +28,40 @@ def show_banner():
 ██║ ╚═╝ ██║╚██████╔╝╚██████╔╝███████╗██║███████║
 ╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚══════╝╚═╝╚══════╝
 {Fore.GREEN}Created by RockSec
+🚀 {Fore.YELLOW}Automated JavaScript Secret Finder  
+==================================================
 """
     print(banner)
 
-# Secret patterns for API key detection
-secret_patterns = {
+# Function to find subdomains using Assetfinder
+def run_assetfinder(domain):
+    try:
+        result = subprocess.run(['assetfinder', '--subs-only', domain], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subdomains = result.stdout.decode('utf-8').splitlines()
+        return subdomains
+    except Exception as e:
+        print(f"{Fore.RED}Error running assetfinder for domain {domain}: {e}")
+        return []
+
+# Function to crawl subdomains using Katana and fetch URLs
+def crawl_subdomain(subdomain):
+    try:
+        result = subprocess.run(['katana', '-u', f'http://{subdomain}', '-silent'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        return result.stdout.decode('utf-8').splitlines()
+    except Exception as e:
+        print(f"{Fore.RED}Error fetching URLs from {subdomain}: {e}")
+        return []
+
+# Function to extract JavaScript files from URLs
+def filter_js_files(urls):
+    return {url for url in urls if url.endswith(".js")}
+
+# Function to scan JavaScript files for secrets & URLs
+def scan_js_for_secrets_and_urls(js_urls):
+    found_secrets = {}
+    found_urls = {}
+
+    secret_patterns = {
     'General API Key': r'(?i)\bAPI\s*Key\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
     'API Token': r'(?i)\bAPI\s*Token\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
     'API Access Key': r'(?i)\bAPI\s*Access\s*Key\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
@@ -241,28 +270,9 @@ secret_patterns = {
                     r"password is\s*[`=:\"]*\s*[^\s]+|" \
                     r"pwd\s*[`=:\"]*\s*[^\s]+|" \
                     r"passwd\s*[`=:\"]+\s*[^\s]+)",
-}
+    }
 
-# URL pattern to extract endpoints from JS files
-url_pattern = r'(https?:\/\/[a-zA-Z0-9\-._~:/?#\[\]@!$&\'()*+,;=%]+)'
-
-# Function to crawl subdomain with katana and fetch URLs
-def crawl_subdomain(subdomain):
-    try:
-        result = subprocess.run(['katana', '-u', f'http://{subdomain}', '-silent'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        return result.stdout.decode('utf-8').splitlines()
-    except Exception as e:
-        print(f"{Fore.RED}Error fetching URLs from {subdomain}: {e}")
-        return []
-
-# Function to extract JS files from URLs
-def filter_js_files(urls):
-    return {url for url in urls if url.endswith(".js")}
-
-# Function to scan JavaScript files for secrets & URLs
-def scan_js_for_secrets_and_urls(js_urls):
-    found_secrets = {}
-    found_urls = {}
+    url_pattern = r'(https?:\/\/[a-zA-Z0-9\-._~:/?#\[\]@!$&\'()*+,;=%]+)'
 
     for js_url in js_urls:
         try:
@@ -270,8 +280,8 @@ def scan_js_for_secrets_and_urls(js_urls):
             if response.status_code == 200:
                 js_content = response.text
             else:
-                print(f"{Fore.YELLOW}Error accessing {js_url}. Trying web archive...")
-                js_content = None  # Skipping fetching from Web Archive for now
+                print(f"{Fore.YELLOW}Error accessing {js_url}. Skipping...")
+                js_content = None
 
             if js_content:
                 # Extract secrets
@@ -294,12 +304,11 @@ def scan_js_for_secrets_and_urls(js_urls):
 
     return found_secrets, found_urls
 
-# Function to save results to a uniquely named JSON file
+# Function to save results to JSON file
 def save_results_to_json(subdomains, js_files, secrets, js_urls, filename_prefix="results"):
-    # Generate a unique filename based on current timestamp
     timestamp = time.strftime("%Y%m%d_%H%M%S")
     filename = f"{filename_prefix}_{timestamp}.json"
-    
+
     results = {
         "subdomains": subdomains,
         "javascript_files": list(js_files),
@@ -312,33 +321,22 @@ def save_results_to_json(subdomains, js_files, secrets, js_urls, filename_prefix
 
     print(f"\n{Fore.GREEN}Results saved to {filename}")
 
-# Function to run subfinder if a domain is provided
-def run_subfinder_for_domain(domain):
-    try:
-        result = subprocess.run(['subfinder', '-d', domain, '-silent'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        subdomains = result.stdout.decode('utf-8').splitlines()
-        return subdomains
-    except Exception as e:
-        print(f"{Fore.RED}Error running subfinder for domain {domain}: {e}")
-        return []
-
 # Main function
 def main(domain=None, file_path=None, threads=10):
     show_banner()  # Display the banner before scanning
 
     all_js_files = set()
 
-    # Check if domain is provided or file is provided
-    if domain:  
+    if domain:
         print(f"{Fore.GREEN}Scanning domain: {domain}")
-        subdomains = run_subfinder_for_domain(domain)
+        subdomains = run_assetfinder(domain)
 
         if not subdomains:
             print(f"{Fore.RED}No subdomains found for domain {domain}. Exiting.")
             return
 
         print(f"{Fore.BLUE}Found {len(subdomains)} subdomains.")
-    elif file_path:  
+    elif file_path:
         print(f"{Fore.GREEN}Reading subdomains from file: {file_path}")
         try:
             with open(file_path, 'r') as file:
@@ -370,7 +368,6 @@ def main(domain=None, file_path=None, threads=10):
     print(f"{Fore.CYAN}Scanning {len(all_js_files)} JavaScript files for secrets & URLs...")
     secrets, extracted_urls = scan_js_for_secrets_and_urls(all_js_files)
 
-    # Display found secrets
     if secrets:
         print(f"\n{Fore.RED}Found Secrets:")
         for js_file, secret_data in secrets.items():
@@ -381,7 +378,6 @@ def main(domain=None, file_path=None, threads=10):
     else:
         print(f"\n{Fore.GREEN}No secrets found.")
 
-    # Display extracted URLs
     if extracted_urls:
         print(f"\n{Fore.MAGENTA}Extracted URLs from JavaScript files:")
         for js_file, urls in extracted_urls.items():
@@ -401,7 +397,7 @@ if __name__ == "__main__":
 
     flag = sys.argv[1]
     input_data = sys.argv[2]
-    threads = 10  
+    threads = 10
 
     if "--threads" in sys.argv:
         threads = int(sys.argv[sys.argv.index("--threads") + 1])
