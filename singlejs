@@ -8,8 +8,9 @@ import urllib3
 import sys
 import time
 from colorama import Fore, Style, init
+import argparse
 
-# Initialize colorama for colored terminal output
+# Initialize colorama for cross-platform support
 init(autoreset=True)
 
 # Disable SSL warnings
@@ -26,8 +27,6 @@ def show_banner():
 ██║ ╚═╝ ██║╚██████╔╝╚██████╔╝███████╗██║███████║
 ╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚══════╝╚═╝╚══════╝
 {Fore.GREEN}Created by RockSec
-🚀 {Fore.YELLOW}Automated JavaScript Secret Finder  
-==================================================
 """
     print(banner)
 
@@ -323,50 +322,128 @@ def save_results_to_json(domain, js_files, secrets, js_urls, filename_prefix="re
 
     print(f"\n{Fore.GREEN}Results saved to {filename}")
 
-# Main function
-def main(domain):
+# Function to read JS URLs from a file
+def read_js_urls_from_file(file_path):
+    try:
+        with open(file_path, 'r') as file:
+            js_urls = [line.strip() for line in file.readlines() if line.strip()]
+        return js_urls
+    except Exception as e:
+        print(f"{Fore.RED}Error reading {file_path}: {e}")
+        return []
+
+# Main function to scan either a domain, a single JS file, or a list of JS files from a file
+def main():
     show_banner()  # Show banner before starting
 
-    print(f"{Fore.CYAN}Scanning domain: {domain}\n")
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description="Scan a domain, a single JavaScript file, or a list of JavaScript files for secrets and URLs.")
+    parser.add_argument('domain', help="Target domain to scan (e.g., example.com)", nargs='?')
+    parser.add_argument('--js-url', help="URL of a single .js file to scan directly")
+    parser.add_argument('--js-file', help="Path to a file containing a list of .js URLs to scan (e.g., js.txt)")
 
-    # Crawl domain to get all URLs
-    urls = crawl_domain(domain)
+    args = parser.parse_args()
 
-    # Filter out .js files
-    all_js_files = filter_js_files(urls)
+    if args.js_url:
+        js_urls = [args.js_url]
+        print(f"{Fore.CYAN}Scanning single JS file: {args.js_url}\n")
+        secrets, extracted_urls = scan_js_for_secrets_and_urls(js_urls)
 
-    print(f"{Fore.YELLOW}Scanning {len(all_js_files)} JavaScript files for secrets & URLs...\n")
-    secrets, extracted_urls = scan_js_for_secrets_and_urls(all_js_files)
+        # Display found secrets
+        if secrets:
+            print(f"\n{Fore.RED}Found Secrets:")
+            for js_file, secret_data in secrets.items():
+                print(f"\n{Fore.YELLOW}[+] {js_file}")
+                for secret_name, values in secret_data.items():
+                    for value in values:
+                        print(f"{Fore.RED}    - {secret_name}: {value}")
+        else:
+            print(f"\n{Fore.GREEN}No secrets found.")
 
-    # Display found secrets
-    if secrets:
-        print(f"\n{Fore.RED}Found Secrets:")
-        for js_file, secret_data in secrets.items():
-            print(f"\n{Fore.YELLOW}[+] {js_file}")
-            for secret_name, values in secret_data.items():
-                for value in values:
-                    print(f"{Fore.RED}    - {secret_name}: {value}")
+        # Display extracted URLs
+        if extracted_urls:
+            print(f"\n{Fore.MAGENTA}Extracted URLs from JavaScript file:")
+            for js_file, urls in extracted_urls.items():
+                print(f"\n{Fore.YELLOW}[+] {js_file}")
+                for url in urls:
+                    print(f"{Fore.CYAN}    - {url}")
+        else:
+            print(f"\n{Fore.GREEN}No URLs found in JavaScript file.")
+        
+        # Save results
+        save_results_to_json("single_js_scan", js_urls, secrets, extracted_urls)
+
+    elif args.js_file:
+        js_urls = read_js_urls_from_file(args.js_file)
+        if js_urls:
+            print(f"{Fore.CYAN}Scanning list of JS files from {args.js_file}\n")
+            secrets, extracted_urls = scan_js_for_secrets_and_urls(js_urls)
+
+            # Display found secrets
+            if secrets:
+                print(f"\n{Fore.RED}Found Secrets:")
+                for js_file, secret_data in secrets.items():
+                    print(f"\n{Fore.YELLOW}[+] {js_file}")
+                    for secret_name, values in secret_data.items():
+                        for value in values:
+                            print(f"{Fore.RED}    - {secret_name}: {value}")
+            else:
+                print(f"\n{Fore.GREEN}No secrets found.")
+
+            # Display extracted URLs
+            if extracted_urls:
+                print(f"\n{Fore.MAGENTA}Extracted URLs from JavaScript files:")
+                for js_file, urls in extracted_urls.items():
+                    print(f"\n{Fore.YELLOW}[+] {js_file}")
+                    for url in urls:
+                        print(f"{Fore.CYAN}    - {url}")
+            else:
+                print(f"\n{Fore.GREEN}No URLs found in JavaScript files.")
+            
+            # Save results
+            save_results_to_json("js_file_scan", js_urls, secrets, extracted_urls)
+
+    elif args.domain:
+        domain = args.domain
+        print(f"{Fore.CYAN}Scanning domain: {domain}\n")
+
+        # Crawl domain to get all URLs
+        urls = crawl_domain(domain)
+
+        # Filter out .js files
+        all_js_files = filter_js_files(urls)
+
+        print(f"{Fore.YELLOW}Scanning {len(all_js_files)} JavaScript files for secrets & URLs...\n")
+        secrets, extracted_urls = scan_js_for_secrets_and_urls(all_js_files)
+
+        # Display found secrets
+        if secrets:
+            print(f"\n{Fore.RED}Found Secrets:")
+            for js_file, secret_data in secrets.items():
+                print(f"\n{Fore.YELLOW}[+] {js_file}")
+                for secret_name, values in secret_data.items():
+                    for value in values:
+                        print(f"{Fore.RED}    - {secret_name}: {value}")
+        else:
+            print(f"\n{Fore.GREEN}No secrets found.")
+
+        # Display extracted URLs
+        if extracted_urls:
+            print(f"\n{Fore.MAGENTA}Extracted URLs from JavaScript files:")
+            for js_file, urls in extracted_urls.items():
+                print(f"\n{Fore.YELLOW}[+] {js_file}")
+                for url in urls:
+                    print(f"{Fore.CYAN}    - {url}")
+        else:
+            print(f"\n{Fore.GREEN}No URLs found in JavaScript files.")
+
+        # Save results to uniquely named JSON file
+        save_results_to_json(domain, all_js_files, secrets, extracted_urls)
+
     else:
-        print(f"\n{Fore.GREEN}No secrets found.")
-
-    # Display extracted URLs
-    if extracted_urls:
-        print(f"\n{Fore.MAGENTA}Extracted URLs from JavaScript files:")
-        for js_file, urls in extracted_urls.items():
-            print(f"\n{Fore.YELLOW}[+] {js_file}")
-            for url in urls:
-                print(f"{Fore.CYAN}    - {url}")
-    else:
-        print(f"\n{Fore.GREEN}No URLs found in JavaScript files.")
-
-    # Save results to uniquely named JSON file
-    save_results_to_json(domain, all_js_files, secrets, extracted_urls)
+        print(f"{Fore.RED}Usage: python3 main.py <domain> | --js-url <url> | --js-file <file>")
+        sys.exit(1)
 
 # Entry point for script execution
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print(f"{Fore.RED}Usage: python3 main.py <domain>")
-        sys.exit(1)
-
-    target_domain = sys.argv[1]  # Fetch domain from command-line arguments
-    main(target_domain)
+    main()
