@@ -35,7 +35,7 @@ Help
    chmod +x singlejs
    ```
 
-2. Move the script to `/usr/local/bin`:
+2. If you want to Run Globally Move or Copy the script to `/usr/local/bin`:
    ```bash
    mv singlejs /usr/local/bin
    ```
@@ -59,7 +59,7 @@ Help
    chmod +x multijs
    ```
 
-2. Move the script to `/usr/local/bin`:
+2. If you want to Run Globally Move or Copy the script to `/usr/local/bin`:
    ```bash
    mv multijs /usr/local/bin
    ```
