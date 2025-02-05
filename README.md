@@ -37,26 +37,28 @@ Help
    ```
 2. If you want to Run Globally Move or Copy the script to `/usr/local/bin`:
    For Move
+   
    ```bash
    mv singlejs /usr/local/bin
    ```
    For Copy
+   
       ```bash
    cp singlejs /usr/local/bin
    ```
-3. Help
+4. Help
    ```bash
    singlejs -h
 
-4. Run the command for your domain:
+5. Run the command for your domain:
    ```bash
    singlejs example.com
    ```
-5. Run the command for single JS Url:
+6. Run the command for single JS Url:
    ```bash
    singlejs --js-url  https://example.com/congif.js
    ```
-6. Run the command for multiple JS Urls:
+7. Run the command for multiple JS Urls:
    ```bash
    singlejs --js-file  js.txt
    ```
@@ -78,25 +80,27 @@ Help
 2. If you want to Run Globally Move or Copy the script to `/usr/local/bin`:
    
    For Move
+   
    ```bash
    mv multijs /usr/local/bin
    ```
    For Copy
+   
       ```bash
    cp multijs /usr/local/bin
    ```
 
-3. Help
+4. Help
    ```bash
    multijs -h
    ```
    
-4. If you don't have a list of subdomains, run:
+5. If you don't have a list of subdomains, run:
    ```bash
    multijs -d example.com --threads 20
    ```
 
-5. If you have a list of subdomains in a text file (e.g., `subdomains.txt`), run:
+6. If you have a list of subdomains in a text file (e.g., `subdomains.txt`), run:
    ```bash
    multijs -f subdomains.txt --threads 20
    ```
