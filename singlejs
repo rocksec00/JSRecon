@@ -7,13 +7,30 @@ import json
 import urllib3
 import sys
 import time
+from colorama import Fore, Style, init
+
+# Initialize colorama for colored terminal output
+init(autoreset=True)
 
 # Disable SSL warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+# Function to display a banner
+def show_banner():
+    banner = f"""
+{Fore.CYAN}
+███╗   ███╗██╗   ██╗██╗   ██╗██╗     ██╗███████╗
+████╗ ████║██║   ██║██║   ██║██║     ██║██╔════╝
+██╔████╔██║██║   ██║██║   ██║██║     ██║███████╗
+██║╚██╔╝██║██║   ██║██║   ██║██║     ██║╚════██║
+██║ ╚═╝ ██║╚██████╔╝╚██████╔╝███████╗██║███████║
+╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚══════╝╚═╝╚══════╝
+{Fore.GREEN}Created by RockSec
+"""
+    print(banner)
+
 # Secret patterns for API key detection
 secret_patterns = {
-      
     'General API Key': r'(?i)\bAPI\s*Key\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
     'API Token': r'(?i)\bAPI\s*Token\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
     'API Access Key': r'(?i)\bAPI\s*Access\s*Key\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
@@ -233,7 +250,7 @@ def crawl_domain(domain):
         result = subprocess.run(['katana', '-u', f'http://{domain}', '-silent'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         return result.stdout.decode('utf-8').splitlines()
     except Exception as e:
-        print(f"Error fetching URLs from {domain}: {e}")
+        print(f"{Fore.RED}Error fetching URLs from {domain}: {e}")
         return []
 
 # Function to extract JS files from URLs
@@ -249,7 +266,7 @@ def fetch_from_webarchive(js_url):
             return response.text
         return None
     except Exception as e:
-        print(f"Error fetching {js_url} from Web Archive: {e}")
+        print(f"{Fore.RED}Error fetching {js_url} from Web Archive: {e}")
         return None
 
 # Function to scan JavaScript files for secrets & URLs
@@ -263,7 +280,7 @@ def scan_js_for_secrets_and_urls(js_urls):
             if response.status_code == 200:
                 js_content = response.text
             else:
-                print(f"Error accessing {js_url}. Trying web archive...")
+                print(f"{Fore.YELLOW}Error accessing {js_url}. Trying web archive...")
                 js_content = fetch_from_webarchive(js_url)
 
             if js_content:
@@ -283,13 +300,12 @@ def scan_js_for_secrets_and_urls(js_urls):
                     found_urls[js_url] = list(set(urls))  # Remove duplicates
 
         except Exception as e:
-            print(f"Error scanning {js_url}: {e}")
+            print(f"{Fore.RED}Error scanning {js_url}: {e}")
 
     return found_secrets, found_urls
 
 # Function to save results to a uniquely named JSON file
 def save_results_to_json(domain, js_files, secrets, js_urls, filename_prefix="results"):
-    # Generate a unique filename based on current timestamp
     timestamp = time.strftime("%Y%m%d_%H%M%S")
     filename = f"{filename_prefix}_{timestamp}.json"
     
@@ -303,41 +319,43 @@ def save_results_to_json(domain, js_files, secrets, js_urls, filename_prefix="re
     with open(filename, "w") as json_file:
         json.dump(results, json_file, indent=4)
 
-    print(f"\nResults saved to {filename}")
+    print(f"\n{Fore.GREEN}Results saved to {filename}")
 
 # Main function
 def main(domain):
-    print(f"Scanning domain {domain}...")
-    
+    show_banner()  # Show banner before starting
+
+    print(f"{Fore.CYAN}Scanning domain: {domain}\n")
+
     # Crawl domain to get all URLs
     urls = crawl_domain(domain)
 
     # Filter out .js files
     all_js_files = filter_js_files(urls)
 
-    print(f"Scanning {len(all_js_files)} JavaScript files for secrets & URLs...")
+    print(f"{Fore.YELLOW}Scanning {len(all_js_files)} JavaScript files for secrets & URLs...\n")
     secrets, extracted_urls = scan_js_for_secrets_and_urls(all_js_files)
 
     # Display found secrets
     if secrets:
-        print("\nFound Secrets:")
+        print(f"\n{Fore.RED}Found Secrets:")
         for js_file, secret_data in secrets.items():
-            print(f"\n[+] {js_file}")
+            print(f"\n{Fore.YELLOW}[+] {js_file}")
             for secret_name, values in secret_data.items():
                 for value in values:
-                    print(f"    - {secret_name}: {value}")
+                    print(f"{Fore.RED}    - {secret_name}: {value}")
     else:
-        print("\nNo secrets found.")
+        print(f"\n{Fore.GREEN}No secrets found.")
 
     # Display extracted URLs
     if extracted_urls:
-        print("\nExtracted URLs from JavaScript files:")
+        print(f"\n{Fore.MAGENTA}Extracted URLs from JavaScript files:")
         for js_file, urls in extracted_urls.items():
-            print(f"\n[+] {js_file}")
+            print(f"\n{Fore.YELLOW}[+] {js_file}")
             for url in urls:
-                print(f"    - {url}")
+                print(f"{Fore.CYAN}    - {url}")
     else:
-        print("\nNo URLs found in JavaScript files.")
+        print(f"\n{Fore.GREEN}No URLs found in JavaScript files.")
 
     # Save results to uniquely named JSON file
     save_results_to_json(domain, all_js_files, secrets, extracted_urls)
@@ -345,7 +363,7 @@ def main(domain):
 # Entry point for script execution
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python3 main.py <domain>")
+        print(f"{Fore.RED}Usage: python3 main.py <domain>")
         sys.exit(1)
 
     target_domain = sys.argv[1]  # Fetch domain from command-line arguments
