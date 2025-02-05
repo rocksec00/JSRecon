@@ -2,32 +2,12 @@
 
 JsRecon is a powerful and automated tool designed to extract and identify secrets hidden within JavaScript (.js) files. It is particularly useful for discovering hardcoded credentials, API keys, and URLs that may pose security risks. By scanning and analyzing JavaScript files hosted on a target domain, JsRecon helps security researchers and penetration testers efficiently uncover potential vulnerabilities.
 
-## Key Features:
-
-Scans JavaScript files to detect hardcoded secrets, API keys, and URLs.
-
-**Supports multiple scanning options:**
-
-**Single Domain Scan** – Crawls and analyzes JavaScript files from a single domain.
-
-**Subdomain Scan** – Enumerates subdomains and scans their JavaScript files.
-
-**Subdomain List Scan** – Accepts a list of subdomains from a text file and performs scans.
-
-**Single JavaScript URL Scan** – Scans a specific JavaScript file for secrets.
-
-**Multiple JavaScript File Scan** – Accepts a list of .js files from a text file and analyzes them.
-
-By automating the reconnaissance process, JsRecon simplifies JavaScript security analysis, making it an essential tool for ethical hackers and security professionals.
-
 ## How to Use JsRecon
 
 JsRecon operates using a structured flow to find secrets and URLs in JavaScript (.js) files. It provides two scanning options:
 
 1. Single Domain Scan
 2. Subdomain Scan
-
-**Installation Steps**
 
 Before running the tool, ensure you have it installed properly. Follow the installation steps provided in the tool’s documentation or repository.
 
@@ -47,6 +27,24 @@ Similar to the single domain scan, it filters out JavaScript (.js) files from th
 Finally, it scans these .js files to find secrets and extract any additional URLs.
 
 By following this process, JsRecon helps identify hardcoded secrets efficiently across both single domains and their subdomains.
+
+**Key Features:**
+
+Scans JavaScript files to detect hardcoded secrets, API keys, and URLs.
+
+**Supports multiple scanning options:**
+
+**Single Domain Scan** – Crawls and analyzes JavaScript files from a single domain.
+
+**Subdomain Scan** – Enumerates subdomains and scans their JavaScript files.
+
+**Subdomain List Scan** – Accepts a list of subdomains from a text file and performs scans.
+
+**Single JavaScript URL Scan** – Scans a specific JavaScript file for secrets.
+
+**Multiple JavaScript File Scan** – Accepts a list of .js files from a text file and analyzes them.
+
+By automating the reconnaissance process, JsRecon simplifies JavaScript security analysis, making it an essential tool for ethical hackers and security professionals.
 
 ## Installation Steps
 
