@@ -26,16 +26,16 @@ export PATH=$PATH:$GOPATH/bin
 
 To use the tool for a single domain:
 
-Help
-   ```bash
-   singlejs -h
-   ```
 1. Make the script executable:
    ```bash
    chmod +x singlejs
    ```
+2.  Help
+   ```bash
+   singlejs -h
    ```
-2. If you want to Run Globally Move or Copy the script to `/usr/local/bin`:
+3. If you want to Run Globally Move or Copy the script to `/usr/local/bin`:
+   
    For Move
    
    ```bash
@@ -67,17 +67,17 @@ Help
 
 To use the tool for subdomains:
 
-Help
-   ```bash
-   multijs -h
-   ```
-
 1. Make the script executable:
    ```bash
    chmod +x multijs
    ```
+
+2. Help
    
-2. If you want to Run Globally Move or Copy the script to `/usr/local/bin`:
+   ```bash
+   multijs -h
+   ```
+3. If you want to Run Globally Move or Copy the script to `/usr/local/bin`:
    
    For Move
    
