@@ -43,26 +43,20 @@ To use the tool for a single domain:
       ```bash
    cp singlejs /usr/local/bin
    ```
-
+   
 3. Help
-   
-   ```bash
-   singlejs -h
-   ```
-   
-4. Help
    ```bash
    singlejs -h
 
-5. Run the command for your domain:
+4. Run the command for your domain:
    ```bash
    singlejs example.com
    ```
-6. Run the command for single JS Url:
+5. Run the command for single JS Url:
    ```bash
    singlejs --js-url  https://example.com/congif.js
    ```
-7. Run the command for multiple JS Urls:
+6. Run the command for multiple JS Urls:
    ```bash
    singlejs --js-file  js.txt
    ```
@@ -94,17 +88,12 @@ To use the tool for subdomains:
    multijs -h
    ```
    
-4. Help
-   ```bash
-   multijs -h
-   ```
-   
-5. If you don't have a list of subdomains, run:
+4. If you don't have a list of subdomains, run:
    ```bash
    multijs -d example.com --threads 20
    ```
 
-6. If you have a list of subdomains in a text file (e.g., `subdomains.txt`), run:
+5. If you have a list of subdomains in a text file (e.g., `subdomains.txt`), run:
    ```bash
    multijs -f subdomains.txt --threads 20
    ```
