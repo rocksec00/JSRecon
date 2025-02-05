@@ -2,7 +2,7 @@
 
    ```bash
  go install github.com/projectdiscovery/katana/cmd/katana@latest
- go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
+ go install github.com/tomnomnom/assetfinder@latest
    ```
 If Not Access the go tool ; run
   ```bash
