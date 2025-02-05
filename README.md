@@ -48,11 +48,11 @@ To use the tool for a single domain:
    ```bash
    singlejs -h
 
-4. Run the command for your domain:
+4. Run the following command for your domain:
    ```bash
    singlejs example.com
    ```
-5. Run the command for single JS Url:
+5. Run the command following for single JS Url:
    ```bash
    singlejs --js-url  https://example.com/congif.js
    ```
