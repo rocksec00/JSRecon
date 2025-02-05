@@ -48,7 +48,9 @@ Finally, it scans these .js files to find secrets and extract any additional URL
 
 By following this process, JsRecon helps identify hardcoded secrets efficiently across both single domains and their subdomains.
 
-## Required Tools:
+## Installation Steps
+
+ **Required Tools:**
 
    ```bash
  go install github.com/projectdiscovery/katana/cmd/katana@latest
@@ -60,19 +62,19 @@ export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
    ```
 
-## Clone The Repository:
+**Clone The Repository:**
 
    ```bash
   git clone https://github.com/rocksec00/JSRecon.git
   cd JSRecon
    ```
-## Install requiered packages:
+**Install requiered packages:**
 
    ```bash
    pip3 install -r requirements.txt
    ```
 
-## singlejs (For Single Domain)
+**singlejs (For Single Domain)**
 
 To use the tool for a single domain:
 
@@ -111,7 +113,7 @@ To use the tool for a single domain:
    python3 singlejs --js-file  js.txt
    ```
 
-## multijs (For Subdomains)
+**multijs (For Subdomains)**
 
 To use the tool for subdomains:
 
