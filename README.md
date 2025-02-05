@@ -26,6 +26,10 @@ export PATH=$PATH:$GOPATH/bin
 
 To use the tool for a single domain:
 
+Help
+   ```bash
+   singlejs -h
+   ```
 1. Make the script executable:
    ```bash
    chmod +x singlejs
@@ -44,6 +48,11 @@ To use the tool for a single domain:
 ## multijs (For Subdomains)
 
 To use the tool for subdomains:
+
+Help
+   ```bash
+   multijs -h
+   ```
 
 1. Make the script executable:
    ```bash
