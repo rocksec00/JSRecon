@@ -56,7 +56,7 @@ To use the tool for a single domain:
    ```bash
    singlejs --js-url  https://example.com/congif.js
    ```
-6. Run the command for multiple JS Urls:
+6. If you have a list of JS Urls in a text file (e.g., js.txt), run:
    ```bash
    singlejs --js-file  js.txt
    ```
