@@ -30,12 +30,8 @@ To use the tool for a single domain:
    ```bash
    chmod +x singlejs
    ```
-2.  Help
    
-   ```bash
-   singlejs -h
-   ```
-3. If you want to Run Globally Move or Copy the script to `/usr/local/bin`:
+2. If you want to Run Globally Move or Copy the script to `/usr/local/bin`:
    
    For Move
    
@@ -47,6 +43,13 @@ To use the tool for a single domain:
       ```bash
    cp singlejs /usr/local/bin
    ```
+
+3. Help
+   
+   ```bash
+   singlejs -h
+   ```
+   
 4. Help
    ```bash
    singlejs -h
@@ -73,12 +76,7 @@ To use the tool for subdomains:
    chmod +x multijs
    ```
 
-2. Help
-   
-   ```bash
-   multijs -h
-   ```
-3. If you want to Run Globally Move or Copy the script to `/usr/local/bin`:
+2. If you want to Run Globally Move or Copy the script to `/usr/local/bin`:
    
    For Move
    
@@ -90,7 +88,12 @@ To use the tool for subdomains:
       ```bash
    cp multijs /usr/local/bin
    ```
-
+3. Help
+   
+   ```bash
+   multijs -h
+   ```
+   
 4. Help
    ```bash
    multijs -h
