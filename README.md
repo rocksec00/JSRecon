@@ -31,6 +31,7 @@ To use the tool for a single domain:
    chmod +x singlejs
    ```
 2.  Help
+   
    ```bash
    singlejs -h
    ```
