@@ -9,6 +9,10 @@ import urllib3
 import sys
 import time
 import os
+from colorama import Fore, Style, init
+
+# Initialize colorama for colored terminal output
+init(autoreset=True)
 
 # Disable SSL warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -234,7 +238,7 @@ def crawl_subdomain(subdomain):
         result = subprocess.run(['katana', '-u', f'http://{subdomain}', '-silent'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         return result.stdout.decode('utf-8').splitlines()
     except Exception as e:
-        print(f"Error fetching URLs from {subdomain}: {e}")
+        print(f"{Fore.RED}Error fetching URLs from {subdomain}: {e}")
         return []
 
 # Function to extract JS files from URLs
@@ -250,7 +254,7 @@ def fetch_from_webarchive(js_url):
             return response.text
         return None
     except Exception as e:
-        print(f"Error fetching {js_url} from Web Archive: {e}")
+        print(f"{Fore.RED}Error fetching {js_url} from Web Archive: {e}")
         return None
 
 # Function to scan JavaScript files for secrets & URLs
@@ -264,7 +268,7 @@ def scan_js_for_secrets_and_urls(js_urls):
             if response.status_code == 200:
                 js_content = response.text
             else:
-                print(f"Error accessing {js_url}. Trying web archive...")
+                print(f"{Fore.YELLOW}Error accessing {js_url}. Trying web archive...")
                 js_content = fetch_from_webarchive(js_url)
 
             if js_content:
@@ -284,7 +288,7 @@ def scan_js_for_secrets_and_urls(js_urls):
                     found_urls[js_url] = list(set(urls))  # Remove duplicates
 
         except Exception as e:
-            print(f"Error scanning {js_url}: {e}")
+            print(f"{Fore.RED}Error scanning {js_url}: {e}")
 
     return found_secrets, found_urls
 
@@ -304,7 +308,7 @@ def save_results_to_json(subdomains, js_files, secrets, js_urls, filename_prefix
     with open(filename, "w") as json_file:
         json.dump(results, json_file, indent=4)
 
-    print(f"\nResults saved to {filename}")
+    print(f"\n{Fore.GREEN}Results saved to {filename}")
 
 # Function to run subfinder if a domain is provided
 def run_subfinder_for_domain(domain):
@@ -313,7 +317,7 @@ def run_subfinder_for_domain(domain):
         subdomains = result.stdout.decode('utf-8').splitlines()
         return subdomains
     except Exception as e:
-        print(f"Error running subfinder for domain {domain}: {e}")
+        print(f"{Fore.RED}Error running subfinder for domain {domain}: {e}")
         return []
 
 # Main function
@@ -321,38 +325,35 @@ def main(domain=None, file_path=None, threads=10):
     all_js_files = set()
 
     # Check if domain is provided or file is provided
-    if domain:  # Domain provided
-        print(f"Scanning domain: {domain}")
+    if domain:  
+        print(f"{Fore.GREEN}Scanning domain: {domain}")
         subdomains = run_subfinder_for_domain(domain)
 
         if not subdomains:
-            print(f"No subdomains found for domain {domain}. Exiting.")
+            print(f"{Fore.RED}No subdomains found for domain {domain}. Exiting.")
             return
 
-        print(f"Found {len(subdomains)} subdomains.")
-    elif file_path:  # File containing subdomains
-        print(f"Reading subdomains from file: {file_path}")
+        print(f"{Fore.BLUE}Found {len(subdomains)} subdomains.")
+    elif file_path:  
+        print(f"{Fore.GREEN}Reading subdomains from file: {file_path}")
         try:
             with open(file_path, 'r') as file:
                 subdomains = [line.strip() for line in file.readlines()]
         except Exception as e:
-            print(f"Error reading subdomain file: {e}")
+            print(f"{Fore.RED}Error reading subdomain file: {e}")
             return
 
         if not subdomains:
-            print("No subdomains found in the provided file.")
+            print(f"{Fore.RED}No subdomains found in the provided file.")
             return
     else:
-        print("Please provide either a domain or a subdomain file.")
+        print(f"{Fore.RED}Please provide either a domain or a subdomain file.")
         return
 
-    # Use ThreadPoolExecutor to process subdomains in parallel
     with concurrent.futures.ThreadPoolExecutor(max_workers=threads) as executor:
-        print(f"Crawling subdomains with {threads} threads...")
+        print(f"{Fore.YELLOW}Crawling subdomains with {threads} threads...")
         future_to_subdomain = {executor.submit(crawl_subdomain, subdomain): subdomain for subdomain in subdomains}
 
-        # Gather all JS URLs
-        all_js_files = set()
         for future in concurrent.futures.as_completed(future_to_subdomain):
             subdomain = future_to_subdomain[future]
             try:
@@ -360,61 +361,45 @@ def main(domain=None, file_path=None, threads=10):
                 js_files = filter_js_files(urls)
                 all_js_files.update(js_files)
             except Exception as e:
-                print(f"Error crawling {subdomain}: {e}")
+                print(f"{Fore.RED}Error crawling {subdomain}: {e}")
 
-    print(f"Scanning {len(all_js_files)} JavaScript files for secrets & URLs...")
+    print(f"{Fore.CYAN}Scanning {len(all_js_files)} JavaScript files for secrets & URLs...")
     secrets, extracted_urls = scan_js_for_secrets_and_urls(all_js_files)
 
     # Display found secrets
     if secrets:
-        print("\nFound Secrets:")
+        print(f"\n{Fore.RED}Found Secrets:")
         for js_file, secret_data in secrets.items():
-            print(f"\n[+] {js_file}")
+            print(f"\n{Fore.YELLOW}[+] {js_file}")
             for secret_name, values in secret_data.items():
                 for value in values:
-                    print(f"    - {secret_name}: {value}")
+                    print(f"{Fore.RED}    - {secret_name}: {value}")
     else:
-        print("\nNo secrets found.")
+        print(f"\n{Fore.GREEN}No secrets found.")
 
     # Display extracted URLs
     if extracted_urls:
-        print("\nExtracted URLs from JavaScript files:")
+        print(f"\n{Fore.MAGENTA}Extracted URLs from JavaScript files:")
         for js_file, urls in extracted_urls.items():
-            print(f"\n[+] {js_file}")
+            print(f"\n{Fore.YELLOW}[+] {js_file}")
             for url in urls:
-                print(f"    - {url}")
+                print(f"{Fore.CYAN}    - {url}")
     else:
-        print("\nNo URLs found in JavaScript files.")
+        print(f"\n{Fore.GREEN}No URLs found in JavaScript files.")
 
-    # Save results to uniquely named JSON file
     save_results_to_json(subdomains, all_js_files, secrets, extracted_urls)
 
 # Entry point for script execution
 if __name__ == "__main__":
-    # Check if the correct flags are passed
     if len(sys.argv) < 3:
-        print("Usage: python3 main.py -d <domain> OR python3 main.py -f <subdomain_file> --threads <number_of_threads>")
+        print(f"{Fore.RED}Usage: python3 main.py -d <domain> OR python3 main.py -f <subdomain_file> --threads <number_of_threads>")
         sys.exit(1)
 
     flag = sys.argv[1]
     input_data = sys.argv[2]
-    threads = 10  # Default threads value
+    threads = 10  
 
-    # Check if the --threads flag is passed
     if "--threads" in sys.argv:
-        try:
-            threads_idx = sys.argv.index("--threads") + 1
-            threads = int(sys.argv[threads_idx])
-        except (IndexError, ValueError):
-            print("Invalid value for threads. Using default value of 10.")
-            threads = 10
+        threads = int(sys.argv[sys.argv.index("--threads") + 1])
 
-    if flag == "-d":  # Domain mode
-        print(f"Starting scan for domain: {input_data} with {threads} threads.")
-        main(domain=input_data, threads=threads)
-    elif flag == "-f":  # Subdomain file mode
-        print(f"Starting scan from subdomain file: {input_data} with {threads} threads.")
-        main(file_path=input_data, threads=threads)
-    else:
-        print("Invalid flag! Use -d for domain or -f for subdomain file.")
-        sys.exit(1)
+    main(domain=input_data if flag == "-d" else None, file_path=input_data if flag == "-f" else None, threads=threads)
