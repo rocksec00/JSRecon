@@ -28,7 +28,7 @@ Finally, it scans these .js files to find secrets and extract any additional URL
 
 By following this process, JsRecon helps identify hardcoded secrets efficiently across both single domains and their subdomains.
 
-**Key Features:**
+## Key Features:
 
 Scans JavaScript files to detect hardcoded secrets, API keys, and URLs.
 
