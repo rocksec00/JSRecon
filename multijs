@@ -29,8 +29,6 @@ def show_banner():
 ╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚══════╝╚═╝╚══════╝
 {Fore.GREEN}Created by RockSec
 """
-{Fore.YELLOW}Automated JavaScript Secret Finder  
-"""
     print(banner)
 
 # Secret patterns for API key detection
