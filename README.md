@@ -1,6 +1,6 @@
 ## JSRecon - JavaScript Secrets Reconnaissance Tool
 
-JsRecon is a powerful and automated tool designed to extract and identify secrets hidden within JavaScript (.js) files. It is particularly useful for discovering hardcoded credentials, API keys, and URLs that may pose security risks. By scanning and analyzing JavaScript files hosted on a target domain, JsRecon helps security researchers and penetration testers efficiently uncover potential vulnerabilities.
+JsRecon is a powerful and automated tool designed to extract and identify secrets hidden within JavaScript (.js) files. It is particularly useful for discovering hardcoded credentials, API keys, and URLs that may pose security risks. By scanning and analyzing JavaScript files hosted on a target domain or local system, JsRecon helps security researchers and penetration testers efficiently uncover potential vulnerabilities.
 
 ## How JSRecon Tool Works
 
@@ -43,6 +43,8 @@ Scans JavaScript files to detect hardcoded secrets, API keys, and URLs.
 **Single JavaScript URL Scan** – Scans a specific JavaScript file for secrets.
 
 **Multiple JavaScript File Scan** – Accepts a list of .js files from a text file and analyzes them.
+
+**Local JavaScript File Scan** – Now supports scanning JavaScript files stored locally on your system.
 
 By automating the reconnaissance process, JsRecon simplifies JavaScript security analysis, making it an essential tool for ethical hackers and security professionals.
 
@@ -109,6 +111,10 @@ To use the tool for a single domain:
 6. If you have a list of JS Urls in a text file (e.g., js.txt), run: **(If you use globally access ignore "python3")**
    ```bash
    python3 singlejs --js-file  js.txt
+   ```
+7. If you have local .js file (eg., file.js)
+  ```bash
+   python3 singlejs --local-js-file  file.js
    ```
 
 **multijs (For Subdomains)**
