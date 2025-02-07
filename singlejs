@@ -7,6 +7,7 @@ import json
 import urllib3
 import sys
 import time
+import os
 from colorama import Fore, Style, init
 import argparse
 
@@ -34,7 +35,7 @@ def show_banner():
 
 # Secret patterns for API key detection
 secret_patterns = {
-     'General API Key': r'(?i)\bAPI\s*Key\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
+        'General API Key': r'(?i)\bAPI\s*Key\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
     'API Token': r'(?i)\bAPI\s*Token\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
     'API Access Key': r'(?i)\bAPI\s*Access\s*Key\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
     'API Secret': r'(?i)\bAPI\s*Secret\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
@@ -352,6 +353,26 @@ def scan_local_js_file(file_path):
         print(f"{Fore.RED}Error reading {file_path}: {e}")
         return {}, []
 
+# Function to scan a local folder for .js files and scan them
+def scan_local_folder(folder_path):
+    try:
+        js_files = [os.path.join(root, file) for root, _, files in os.walk(folder_path) for file in files if file.endswith('.js')]
+        secrets = {}
+        extracted_urls = {}
+
+        for js_file in js_files:
+            file_secrets, file_urls = scan_local_js_file(js_file)
+            if file_secrets:
+                secrets[js_file] = file_secrets
+            if file_urls:
+                extracted_urls[js_file] = file_urls
+
+        return secrets, extracted_urls
+
+    except Exception as e:
+        print(f"{Fore.RED}Error scanning folder {folder_path}: {e}")
+        return {}, {}
+
 # Main function to scan either a domain, a single JS file, or a list of JS files from a file
 def main():
     show_banner()  # Show banner before starting
@@ -362,6 +383,7 @@ def main():
     parser.add_argument('--js-url', help="URL of a single .js file to scan directly")
     parser.add_argument('--js-file', help="Path to a file containing a list of .js URLs to scan (e.g., js.txt)")
     parser.add_argument('--local-js-file', help="Path to a local .js file to scan directly")
+    parser.add_argument('--local-folder', help="Path to a local folder containing .js files to scan")
 
     args = parser.parse_args()
 
@@ -448,6 +470,34 @@ def main():
         # Save results
         save_results_to_json("local_js_scan", [args.local_js_file], secrets, {args.local_js_file: extracted_urls})
 
+    elif args.local_folder:
+        print(f"{Fore.CYAN}Scanning local folder: {args.local_folder}\n")
+        secrets, extracted_urls = scan_local_folder(args.local_folder)
+
+        # Display found secrets
+        if secrets:
+            print(f"\n{Fore.RED}Found Secrets:")
+            for js_file, secret_data in secrets.items():
+                print(f"\n{Fore.YELLOW}[+] {js_file}")
+                for secret_name, values in secret_data.items():
+                    for value in values:
+                        print(f"{Fore.RED}    - {secret_name}: {value}")
+        else:
+            print(f"\n{Fore.GREEN}No secrets found.")
+
+        # Display extracted URLs
+        if extracted_urls:
+            print(f"\n{Fore.MAGENTA}Extracted URLs from local JavaScript files:")
+            for js_file, urls in extracted_urls.items():
+                print(f"\n{Fore.YELLOW}[+] {js_file}")
+                for url in urls:
+                    print(f"{Fore.CYAN}    - {url}")
+        else:
+            print(f"\n{Fore.GREEN}No URLs found in local JavaScript files.")
+
+        # Save results
+        save_results_to_json("local_folder_scan", list(secrets.keys()), secrets, extracted_urls)
+
     elif args.domain:
         domain = args.domain
         print(f"{Fore.CYAN}Scanning domain: {domain}\n")
@@ -486,7 +536,7 @@ def main():
         save_results_to_json(domain, all_js_files, secrets, extracted_urls)
 
     else:
-        print(f"{Fore.RED}Usage: python3 main.py <domain> | --js-url <url> | --js-file <file> | --local-js-file <file>")
+        print(f"{Fore.RED}Usage: python3 main.py <domain> | --js-url <url> | --js-file <file> | --local-js-file <file> | --local-folder <folder>")
         sys.exit(1)
 
 # Entry point for script execution
