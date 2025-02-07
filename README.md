@@ -42,9 +42,11 @@ Scans JavaScript files to detect hardcoded secrets, API keys, and URLs.
 
 **Single JavaScript URL Scan** – Scans a specific JavaScript file for secrets.
 
-**Multiple JavaScript File Scan** – Accepts a list of .js files from a text file and analyzes them.
+**Multiple JavaScript File Scan** – Accepts a list of .js urls from a text file and analyzes them.
 
 **Local JavaScript File Scan** – Now supports scanning JavaScript files stored locally on your system.
+
+**Folder Scan** – Analyzes all JavaScript files within a specified local folder.
 
 By automating the reconnaissance process, JsRecon simplifies JavaScript security analysis, making it an essential tool for ethical hackers and security professionals.
 
@@ -115,6 +117,10 @@ To use the tool for a single domain:
 7. If you have local .js file (eg., file.js)
   ```bash
    python3 singlejs --local-js-file  file.js
+   ```
+8. If you have folder containing .js files 
+  ```bash
+   python3 singlejs  --local-folder path/to/foldername
    ```
 
 **multijs (For Subdomains)**
