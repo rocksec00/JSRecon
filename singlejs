@@ -27,14 +27,14 @@ def show_banner():
 ██║ ╚═╝ ██║╚██████╔╝╚██████╔╝███████╗██║███████║
 ╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚══════╝╚═╝╚══════╝
 {Fore.GREEN}Created by RockSec
-🚀 {Fore.YELLOW}Automated JavaScript Secret Finder  
+🚀 {Fore.YELLOW}Automated JavaScript Secret Finder
 ==================================================
 """
     print(banner)
 
 # Secret patterns for API key detection
 secret_patterns = {
-    'General API Key': r'(?i)\bAPI\s*Key\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
+     'General API Key': r'(?i)\bAPI\s*Key\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
     'API Token': r'(?i)\bAPI\s*Token\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
     'API Access Key': r'(?i)\bAPI\s*Access\s*Key\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
     'API Secret': r'(?i)\bAPI\s*Secret\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
@@ -311,7 +311,7 @@ def scan_js_for_secrets_and_urls(js_urls):
 def save_results_to_json(domain, js_files, secrets, js_urls, filename_prefix="results"):
     timestamp = time.strftime("%Y%m%d_%H%M%S")
     filename = f"{filename_prefix}_{timestamp}.json"
-    
+
     results = {
         "domain": domain,
         "javascript_files": list(js_files),
@@ -334,6 +334,24 @@ def read_js_urls_from_file(file_path):
         print(f"{Fore.RED}Error reading {file_path}: {e}")
         return []
 
+# Function to read and scan a local JavaScript file
+def scan_local_js_file(file_path):
+    try:
+        with open(file_path, 'r') as file:
+            js_content = file.read()
+        secrets = {}
+        for secret_name, pattern in secret_patterns.items():
+            matches = re.findall(pattern, js_content)
+            if matches:
+                secrets[secret_name] = matches
+
+        urls = re.findall(url_pattern, js_content)
+        return secrets, list(set(urls))  # Remove duplicates
+
+    except Exception as e:
+        print(f"{Fore.RED}Error reading {file_path}: {e}")
+        return {}, []
+
 # Main function to scan either a domain, a single JS file, or a list of JS files from a file
 def main():
     show_banner()  # Show banner before starting
@@ -343,6 +361,7 @@ def main():
     parser.add_argument('domain', help="Target domain to scan (e.g., example.com)", nargs='?')
     parser.add_argument('--js-url', help="URL of a single .js file to scan directly")
     parser.add_argument('--js-file', help="Path to a file containing a list of .js URLs to scan (e.g., js.txt)")
+    parser.add_argument('--local-js-file', help="Path to a local .js file to scan directly")
 
     args = parser.parse_args()
 
@@ -371,7 +390,7 @@ def main():
                     print(f"{Fore.CYAN}    - {url}")
         else:
             print(f"\n{Fore.GREEN}No URLs found in JavaScript file.")
-        
+
         # Save results
         save_results_to_json("single_js_scan", js_urls, secrets, extracted_urls)
 
@@ -401,9 +420,33 @@ def main():
                         print(f"{Fore.CYAN}    - {url}")
             else:
                 print(f"\n{Fore.GREEN}No URLs found in JavaScript files.")
-            
+
             # Save results
             save_results_to_json("js_file_scan", js_urls, secrets, extracted_urls)
+
+    elif args.local_js_file:
+        print(f"{Fore.CYAN}Scanning local JS file: {args.local_js_file}\n")
+        secrets, extracted_urls = scan_local_js_file(args.local_js_file)
+
+        # Display found secrets
+        if secrets:
+            print(f"\n{Fore.RED}Found Secrets:")
+            for secret_name, values in secrets.items():
+                for value in values:
+                    print(f"{Fore.RED}    - {secret_name}: {value}")
+        else:
+            print(f"\n{Fore.GREEN}No secrets found.")
+
+        # Display extracted URLs
+        if extracted_urls:
+            print(f"\n{Fore.MAGENTA}Extracted URLs from local JavaScript file:")
+            for url in extracted_urls:
+                print(f"{Fore.CYAN}    - {url}")
+        else:
+            print(f"\n{Fore.GREEN}No URLs found in local JavaScript file.")
+
+        # Save results
+        save_results_to_json("local_js_scan", [args.local_js_file], secrets, {args.local_js_file: extracted_urls})
 
     elif args.domain:
         domain = args.domain
@@ -443,7 +486,7 @@ def main():
         save_results_to_json(domain, all_js_files, secrets, extracted_urls)
 
     else:
-        print(f"{Fore.RED}Usage: python3 main.py <domain> | --js-url <url> | --js-file <file>")
+        print(f"{Fore.RED}Usage: python3 main.py <domain> | --js-url <url> | --js-file <file> | --local-js-file <file>")
         sys.exit(1)
 
 # Entry point for script execution
