@@ -42,7 +42,7 @@ Scans JavaScript files to detect hardcoded secrets, API keys, and URLs.
 
 **Single JavaScript URL Scan** – Scans a specific JavaScript file for secrets.
 
-**Multiple JavaScript File Scan** – Accepts a list of .js urls from a text file and analyzes them.
+**Multiple JavaScript URLs Scan** – Accepts a list of .js urls from a text file and analyzes them.
 
 **Local JavaScript File Scan** – Now supports scanning JavaScript files stored locally on your system.
 
