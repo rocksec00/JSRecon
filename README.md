@@ -1,6 +1,6 @@
 ## JSRecon - JavaScript Secrets Reconnaissance Tool
 
-JsRecon is a powerful and automated tool designed to extract and identify secrets hidden within JavaScript (.js) files. It is particularly useful for discovering hardcoded credentials, API keys, and URLs that may pose security risks. By scanning and analyzing JavaScript files hosted on a target domain or local system, JsRecon helps security researchers and penetration testers efficiently uncover potential vulnerabilities.
+JsRecon is a powerful and automated tool designed to extract and identify secrets hidden within JavaScript (.js) files. It is particularly useful for discovering hardcoded credentials, API keys, and URLs that may pose security risks. By scanning and analyzing JavaScript files hosted on a target domain or locally, JsRecon helps security researchers and penetration testers efficiently uncover potential vulnerabilities.
 
 ## How JSRecon Tool Works
 
