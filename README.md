@@ -162,3 +162,6 @@ To use the tool for subdomains:
 
 ## Note:
 Once completed, the output file will be saved. Ex: results_20250204_224659.json
+
+## Donate:
+https://buymeacoffee.com/rocksec
