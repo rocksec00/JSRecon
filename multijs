@@ -36,7 +36,7 @@ def show_banner():
 # Function to find subdomains using Assetfinder
 def run_assetfinder(domain):
     try:
-        result = subprocess.run(['assetfinder', domain], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = subprocess.run(['assetfinder', '--subs-only', domain], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         subdomains = result.stdout.decode('utf-8').splitlines()
         return subdomains
     except Exception as e:
