@@ -4,14 +4,16 @@ import requests
 import re
 import sys
 import os
-import argparse
 import glob
+import argparse
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
 
 def parser_input(input):
     urls = []
-    if input.startswith("http://") or input.startswith("https://") or input.startswith("file://"):
+    if input.startswith("mailto:"):
+        print(f"[-] Skipping mailto URL: {input}")
+    elif input.startswith("http://") or input.startswith("https://") or input.startswith("file://"):
         urls.append(input)
     elif os.path.isfile(input):
         if input.endswith(".xml"):
@@ -23,6 +25,9 @@ def parser_input(input):
                 lines = file.readlines()
                 for line in lines:
                     line = line.strip()
+                    if line.startswith("mailto:"):
+                        print(f"[-] Skipping mailto URL: {line}")
+                        continue
                     if line.startswith("http"):
                         urls.append(line)
         else:
@@ -97,9 +102,8 @@ def main():
     parser.add_argument("-j", "--js", help="Only analyze provided JS files, skip HTML parsing", action="store_true")
     args = parser.parse_args()
 
-    # Built-in regex patterns
     regex = {
-        'General API Key': r'(?i)\bAPI\s*Key\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
+         'General API Key': r'(?i)\bAPI\s*Key\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
     'API Token': r'(?i)\bAPI\s*Token\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
     'API Access Key': r'(?i)\bAPI\s*Access\s*Key\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
     'API Secret': r'(?i)\bAPI\s*Secret\s*[:=]?\s*[\'"]?([A-Za-z0-9_-]{32,})[\'"]?',
@@ -309,16 +313,17 @@ def main():
                     r"passwd\s*[`=:\"]+\s*[^\s]+)",
     }
 
-    # Add custom pattern if provided
     if args.regex and args.pattern:
         regex[args.pattern] = args.regex
 
-    # Process input (file or single)
     urls = []
     if os.path.isfile(args.input) and args.input.endswith(".txt"):
         with open(args.input, "r") as f:
             for line in f:
                 line = line.strip()
+                if line.startswith("mailto:"):
+                    print(f"[-] Skipping mailto URL: {line}")
+                    continue
                 if line:
                     urls.extend(parser_input(line))
     else:
